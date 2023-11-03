@@ -12,13 +12,10 @@ import Loader from "./Loader";
 
 function Scene() {
   return (
-    <div className='w-screen h-screen'>
-      <Canvas
-      
-      
-      >
-        <fog attach='fog' args={["#fff", 0, 110]} />
-        <Environment preset='sunset' />
+    <div className="w-screen h-screen">
+      <Canvas>
+        <fog attach="fog" args={["#fff", 0, 110]} />
+        <Environment preset="sunset" />
         <ambientLight color={0xa0a0fc} intensity={0.82} />
         <directionalLight position={[-10, 10, 10]} intensity={1.96} />
 

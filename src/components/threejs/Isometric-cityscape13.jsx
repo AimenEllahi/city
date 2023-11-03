@@ -21,32 +21,6 @@ export function Model(props) {
   const ferrisWheelRef = useRef();
   const [controlsEnabled, setControlsEnabled] = useState(false);
 
-  //float camera using useFRame
-  // const minY = 10;
-  // const maxY = 20;
-
-  // useFrame(() => {
-  //   const newY = Math.sin(Date.now() / 2000) * 5 + 15; // Adjust the multiplier and offset as needed
-  //   if (newY > minY && newY < maxY) {
-  //     camera.position.y = newY;
-  //   } else if (newY <= minY) {
-  //     camera.position.y = minY;
-  //   } else if (newY >= maxY) {
-  //     camera.position.y = maxY;
-  //   }
-  // });
-
-  const { position } = useControls("pos", {
-    position: {
-      value: [0, 0, 0],
-      steps: 10,
-    },
-  });
-
-  // useEffect(() => {
-  //   camera.position.set(...position);
-  // }, [position]);
-
   useEffect(() => {
     if (!groupRef.current) return;
 
@@ -54,13 +28,15 @@ export function Model(props) {
     gsap.fromTo(
       camera.position,
       {
-        x: -20,
+        x: -25,
         y: 4,
-        z: -10,
+        z: -15,
       },
       {
         duration: 10,
-        x: 20,
+        x: 5,
+        y: 5.5,
+        z: -15,
 
         delay: 1,
         ease: TWEEN.Easing.Quartic.InOut,
@@ -79,75 +55,66 @@ export function Model(props) {
     if (ferrisWheelRef.current) ferrisWheelRef.current.rotation.y += 0.03;
   });
 
-  // useEffect(() => {
-  //   switch (buildingState) {
-  //     // case 0:
-  //     //   gsap.to(camera.position, {
-  //     //     duration: 5,
-  //     //     x: 20,
-  //     //     y: 13,
-  //     //     z: 40,
-  //     //   });
-  //     case 1:
-  //       gsap.to(camera.position, {
-  //         duration: 5,
-  //         x: -6, //-10
-  //         y: 2,
-  //         z: 14, //12
+  useEffect(() => {
+    switch (buildingState) {
+      // case 0:
+      //   gsap.to(camera.position, {
+      //     duration: 5,
+      //     x: 20,
+      //     y: 13,
+      //     z: 40,
+      //   });
+      case 1:
+        gsap.to(camera.position, {
+          duration: 5,
+          x: -6, //-10
+          y: 2,
+          z: 14, //12
 
-  //         onUpdate: () => {
-  //           camera.lookAt(
-  //             buildingRef.current.position.x,
-  //             buildingRef.current.position.y,
-  //             buildingRef.current.position.z
-  //           );
-  //         },
-  //       });
-  //       break;
-  //     case 2:
-  //       gsap.to(camera.position, {
-  //         duration: 1,
-  //         x: 10, // Example x position for building 2
-  //         y: 10, // Example y position for building 2
-  //         z: 10, // Example z position for building 2
-  //         onComplete: () => {
-  //           gsap.to(camera.rotation, {
-  //             duration: 0.5,
-  //             x: 0,
-  //             y: 0.5,
-  //             z: 0,
-  //           });
-  //         },
-  //         onUpdate: () => {
-  //           camera.lookAt(
-  //             buildingRef.current.position.x,
-  //             buildingRef.current.position.y,
-  //             buildingRef.current.position.z
-  //           );
-  //         },
-  //       });
-  //       break;
-  //     // Add more cases for other buildings as needed
-  //     default:
-  //       break;
-  //   }
-  // }, [buildingState]);
+          onUpdate: () => {
+            camera.lookAt(
+              buildingRef.current.position.x,
+              buildingRef.current.position.y,
+              buildingRef.current.position.z
+            );
+          },
+        });
+        break;
+      case 2:
+        gsap.to(camera.position, {
+          duration: 1,
+          x: 10, // Example x position for building 2
+          y: 10, // Example y position for building 2
+          z: 10, // Example z position for building 2
+          onComplete: () => {
+            gsap.to(camera.rotation, {
+              duration: 0.5,
+              x: 0,
+              y: 0.5,
+              z: 0,
+            });
+          },
+          onUpdate: () => {
+            camera.lookAt(
+              buildingRef.current.position.x,
+              buildingRef.current.position.y,
+              buildingRef.current.position.z
+            );
+          },
+        });
+        break;
+      // Add more cases for other buildings as needed
+      default:
+        break;
+    }
+  }, [buildingState]);
 
   return (
     <PresentationControls enabled={controlsEnabled} polar={[0, 0]}>
-      <group
-        {...props}
-        ref={groupRef}
-        dispose={null}
-
-        // position={[0, -6, 0]}
-      >
+      <group {...props} ref={groupRef} dispose={null}>
         <mesh
           geometry={nodes.Landskape_plane_Landscape_color_1_0002.geometry}
           material={materials["Landscape_color_1.001"]}
-          // onClick={() => {
-          //   setBuildingState(0);
-          // }}
         />
         <mesh
           geometry={nodes.Landskape_plane_Landscape_color_1_0002_1.geometry}
@@ -304,7 +271,7 @@ export function Model(props) {
           scale={0.05}
         />
         <group
-          name='buildings'
+          name="buildings"
           position={[0.4, 0.36, 0.53]}
           rotation={[0, Math.PI / 2, 0]}
           scale={0.65}
@@ -336,7 +303,7 @@ export function Model(props) {
           />
         </group>
         <group
-          name='ferriswheel'
+          name="ferriswheel"
           position={[3.7, 1.49, -3.29]}
           rotation={[Math.PI / 2, 1.57, 0]}
           scale={[-1, 0.15, 1]}
@@ -383,7 +350,7 @@ export function Model(props) {
             ref={ferrisWheelRef}
           />
         </group>
-        <group position={[3.25, 0.36, 2.93]} scale={0.65} name='circlebase'>
+        <group position={[3.25, 0.36, 2.93]} scale={0.65} name="circlebase">
           <mesh
             geometry={nodes.CircleBuildBase004.geometry}
             material={materials.CircularBuildMain}
