@@ -15,7 +15,7 @@ function Car() {
   const animateCar = () => {
     gsap.to(carRef.current.position, {
       duration: 15,
-      x: 40,
+      x: 30,
       y: 0.3999999999999986,
       z: -0.6,
       onComplete: () => {
