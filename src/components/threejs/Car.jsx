@@ -16,13 +16,13 @@ function Car() {
     gsap.to(carRef.current.position, {
       duration: 15,
       x: 30,
-      y: 0.3999999999999986,
+      y: 0.4,
       z: -0.6,
       onComplete: () => {
         // Reset the position of the car
         gsap.set(carRef.current.position, {
-          x: -2.399999999999998,
-          y: 0.3999999999999986,
+          x: -2.4,
+          y: 0.4,
           z: -0.6,
         });
         // Restart the animation
@@ -38,11 +38,7 @@ function Car() {
   }, []);
 
   return (
-    <group
-      ref={carRef}
-      position={[-2.399999999999998, 0.3999999999999986, -0.6]}
-      rotation={[0, 1.6, 0]}
-    >
+    <group ref={carRef} position={[-2.4, 0.4, -0.6]} rotation={[0, 1.6, 0]}>
       <primitive object={gltf.scene} dispose={null} scale={1} />
     </group>
   );

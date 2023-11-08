@@ -11,7 +11,7 @@ import * as THREE from "three";
 
 export function Model(props) {
   const { nodes, materials } = useGLTF("/models/isometric-cityscape13.glb");
-  const [buildingState, setBuildingState] = useState(0);
+  const [initalAnimationPlaying, setInitialAnimationPlaying] = useState(true);
   const { camera } = useThree();
   const buildingRef = useRef();
   const groupRef = useRef();
@@ -35,6 +35,25 @@ export function Model(props) {
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
   };
 
+  const returnToOriginalPosition = () => {
+    gsap.to(camera.position, {
+      duration: 8,
+      delay: 0.5,
+      x: initialCameraPosition.x,
+      y: initialCameraPosition.y,
+      z: initialCameraPosition.z,
+      ease: TWEEN.Easing.Quartic.InOut,
+
+      onUpdate: () => {
+        camera.lookAt(...buildingRef.current.position);
+      },
+      onComplete: () => {
+        setIsInitialPosition(true);
+        setControlsEnabled(true);
+      },
+    });
+  };
+
   const handleMouseDown = (e) => {
     getMousePosition(e);
     raycaster.setFromCamera(mouse, camera);
@@ -46,55 +65,38 @@ export function Model(props) {
       const name = intersects[0].object.parent.name;
       const position = intersects[0].point;
 
-      console.log(`Clicked object: ${name}`);
-      console.log(
-        `Position of clicked object: x: ${position.x}, y: ${position.y}, z: ${position.z}`
-      );
-
-      if (
-        name === "ferriswheel" ||
-        name === "greyBuilding" ||
-        name === "heliBase"
-      ) {
+      if (name === "model") {
         if (isInitialPosition) {
           gsap.to(camera.position, {
-            duration: 5,
+            duration: 8,
             x: position.x + Math.PI * 2 - 1,
             y: position.y + 1.5,
             z: position.z,
-
+            delay: 0.5,
+            ease: TWEEN.Easing.Quartic.InOut,
+            onStart: () => {
+              setControlsEnabled(false);
+            },
             onUpdate: () => {
               // to smooth the camera movement on lookat
-              camera.lookAt(position.x, position.y, position.z);
-            },
-            onComplete: () => {
-              setIsInitialPosition(false);
-            },
-          });
-        } else {
-          gsap.to(camera.position, {
-            duration: 5,
-            x: initialCameraPosition.x,
-            y: initialCameraPosition.y,
-            z: initialCameraPosition.z,
-            onUpdate: () => {
               camera.lookAt(...buildingRef.current.position);
             },
             onComplete: () => {
-              setIsInitialPosition(true);
+              setIsInitialPosition(false);
+              setControlsEnabled(true);
             },
           });
+        } else {
+          returnToOriginalPosition();
         }
+      } else {
+        returnToOriginalPosition();
       }
     }
   };
 
-  document.addEventListener("onclick", handleMouseDown);
-
   useEffect(() => {
-    if (!groupRef.current) return;
-
-    if (controlsEnabled) return;
+    if (!groupRef.current || controlsEnabled) return;
     gsap.fromTo(
       camera.position,
       {
@@ -116,6 +118,7 @@ export function Model(props) {
         },
         onComplete: () => {
           setControlsEnabled(true);
+          setInitialAnimationPlaying(false);
         },
       }
     );
@@ -141,9 +144,10 @@ export function Model(props) {
         ref={groupRef}
         dispose={null}
         onClick={(e) => {
+          if (initalAnimationPlaying) return;
+          if (!controlsEnabled) return;
           handleMouseDown(e);
         }}
-        name="model"
       >
         <mesh
           geometry={nodes.Landskape_plane_Landscape_color_1_0002.geometry}
@@ -310,7 +314,7 @@ export function Model(props) {
           scale={0.05}
         />
         <group
-          name="buildings"
+          name='model'
           position={[0.4, 0.36, 0.53]}
           rotation={[0, Math.PI / 2, 0]}
           scale={0.65}
@@ -342,14 +346,10 @@ export function Model(props) {
           />
         </group>
         <group
-          name="ferriswheel"
+          name='ferriswheel'
           position={[3.7, 1.49, -3.29]}
           rotation={[Math.PI / 2, 1.57, 0]}
           scale={[-1, 0.15, 1]}
-          // onClick={() => {
-          //   setBuildingState(1);
-          //   console.log("here");
-          // }}
         >
           <mesh
             geometry={nodes.FerrisSupport_1.geometry}
@@ -389,7 +389,7 @@ export function Model(props) {
             ref={ferrisWheelRef}
           />
         </group>
-        <group position={[3.25, 0.36, 2.93]} scale={0.65} name="circlebase">
+        <group position={[3.25, 0.36, 2.93]} scale={0.65} name='circlebase'>
           <mesh
             geometry={nodes.CircleBuildBase004.geometry}
             material={materials.CircularBuildMain}
@@ -426,6 +426,7 @@ export function Model(props) {
           </group>
         </group>
         <group
+          name={"model"}
           position={[-2.81, 0.36, 4.19]}
           rotation={[0, Math.PI / 4, 0]}
           scale={0.65}
@@ -463,7 +464,7 @@ export function Model(props) {
             material={materials.WindowLightBlue}
           />
         </group>
-        <group position={[-1.86, 0.36, -0.54]} scale={0.54}>
+        <group name={"model"} position={[-1.86, 0.36, -0.54]} scale={0.54}>
           <mesh
             geometry={nodes.Cube040.geometry}
             material={materials.SquareBlockMain}
@@ -503,6 +504,7 @@ export function Model(props) {
         </group>
 
         <group
+          name='model'
           position={[2.91, 0.36, 0.55]}
           rotation={[0, -Math.PI / 2, 0]}
           scale={0.54}
@@ -548,7 +550,7 @@ export function Model(props) {
             material={materials.BuildingRed}
           />
         </group>
-        <group name="redBuilding" position={[-3.02, 0.36, 0.95]} scale={0.54}>
+        <group name='model' position={[-3.02, 0.36, 0.95]} scale={0.54}>
           <mesh
             geometry={nodes.Cube046.geometry}
             material={materials.OldBrick}
@@ -586,7 +588,7 @@ export function Model(props) {
             material={materials.DarkMetal}
           />
         </group>
-        <group name="greyBuilding" position={[0.71, 0.36, 3.32]} scale={0.54}>
+        <group name='model' position={[0.71, 0.36, 3.32]} scale={0.54}>
           <mesh
             geometry={nodes.Cube049.geometry}
             material={materials.SquareBlockMain}
@@ -632,7 +634,7 @@ export function Model(props) {
             material={materials.Metal}
           />
         </group>
-        <group position={[1.28, 0.36, -2.04]} scale={0.54}>
+        <group position={[1.28, 0.36, -2.04]} scale={0.54} name='model'>
           <mesh
             geometry={nodes.Cube052.geometry}
             material={materials.SquareBlockMain}
@@ -670,7 +672,7 @@ export function Model(props) {
             material={materials.Air_conditioning}
           />
         </group>
-        <group name="heliBase" position={[4.3, 0.36, -1.67]} scale={0.54}>
+        <group name='model' position={[4.3, 0.36, -1.67]} scale={0.54}>
           <mesh
             geometry={nodes.Cube005_1.geometry}
             material={materials.SquareBlockMain}
@@ -716,7 +718,7 @@ export function Model(props) {
             material={materials.BuildingWhite}
           />
         </group>
-        <group position={[-0.36, 0.36, -3.56]} scale={0.65}>
+        <group position={[-0.36, 0.36, -3.56]} scale={0.65} name='model'>
           <mesh
             geometry={nodes.CircleBuildBase002_1.geometry}
             material={materials.CircularBuildMain}
@@ -786,7 +788,7 @@ export function Model(props) {
             />
           </group>
         </group>
-        <group position={[-2.39, 0.36, -3.05]}>
+        <group position={[-2.39, 0.36, -3.05]} name='model'>
           <mesh
             geometry={nodes.Cube038.geometry}
             material={materials.BuildingDarkBlue}

@@ -12,6 +12,7 @@ function Birds() {
   });
   const birdsRef = useRef();
   const animateBirds = () => {
+    if (!birdsRef.current) return;
     //change position and rotation of birds
     gsap.to(birdsRef.current.position, {
       duration: 20,
