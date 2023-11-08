@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useLoader } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import gsap from "gsap";
 
 function Helicopter() {
@@ -37,6 +38,11 @@ function Helicopter() {
       animateHelicopter();
     }
   }, []);
+
+  const helice = gltf.scene.getObjectByName("Helice");
+  useFrame(() => {
+    helice.rotation.y += 0.5;
+  });
 
   return (
     <group

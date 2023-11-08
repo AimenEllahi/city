@@ -35,99 +35,116 @@ export function Model(props) {
     mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
   };
 
+  // Function to return the camera to its original position
   const returnToOriginalPosition = () => {
     gsap.to(camera.position, {
-      duration: 8,
-      delay: 0.5,
-      x: initialCameraPosition.x,
-      y: initialCameraPosition.y,
-      z: initialCameraPosition.z,
-      ease: TWEEN.Easing.Quartic.InOut,
+      duration: 8, // Duration of the animation in seconds
+      delay: 0.5, // Delay before the animation starts
+      x: initialCameraPosition.x, // Returning to the initial x coordinate
+      y: initialCameraPosition.y, // Returning to the initial y coordinate
+      z: initialCameraPosition.z, // Returning to the initial z coordinate
+      ease: TWEEN.Easing.Quartic.InOut, // Easing function for smoother motion
 
       onUpdate: () => {
+        // Function to update the camera's focus on a specific position
         camera.lookAt(...buildingRef.current.position);
       },
       onComplete: () => {
-        setIsInitialPosition(true);
-        setControlsEnabled(true);
+        setIsInitialPosition(true); // Setting the state to indicate the initial position
+        setControlsEnabled(true); // Enabling controls for user interaction
       },
     });
   };
 
+  // Function handling mouse down events
   const handleMouseDown = (e) => {
-    getMousePosition(e);
-    raycaster.setFromCamera(mouse, camera);
+    getMousePosition(e); // Getting the mouse position
+    raycaster.setFromCamera(mouse, camera); // Setting the raycaster position
+
+    // Intersecting objects with the raycaster
     const intersects = raycaster.intersectObjects(
       groupRef.current.children,
       true
     );
-    if (intersects.length > 0) {
-      const name = intersects[0].object.parent.name;
-      const position = intersects[0].point;
 
+    // If intersecting objects are found
+    if (intersects.length > 0) {
+      const name = intersects[0].object.parent.name; // Getting the name of the object
+      const position = intersects[0].point; // Getting the position of the intersection
+
+      // Handling the case when the object's name is "model"
       if (name === "model") {
+        // If the camera is in the initial position, animate it to a new position
         if (isInitialPosition) {
           gsap.to(camera.position, {
-            duration: 8,
-            x: position.x + Math.PI * 2 - 1,
-            y: position.y + 1.5,
-            z: position.z,
-            delay: 0.5,
-            ease: TWEEN.Easing.Quartic.InOut,
+            duration: 8, // Duration of the animation in seconds
+            x: position.x + Math.PI * 2 - 1, // Setting the new x coordinate
+            y: position.y + 1.5, // Setting the new y coordinate
+            z: position.z, // Setting the new z coordinate
+            delay: 0.5, // Delay before the animation starts
+            ease: TWEEN.Easing.Quartic.InOut, // Easing function for smoother motion
             onStart: () => {
-              setControlsEnabled(false);
+              setControlsEnabled(false); // Disabling controls for smoother animation
             },
             onUpdate: () => {
-              // to smooth the camera movement on lookat
-              camera.lookAt(...buildingRef.current.position);
+              camera.lookAt(...buildingRef.current.position); // Updating the camera's focus
             },
             onComplete: () => {
-              setIsInitialPosition(false);
-              setControlsEnabled(true);
+              setIsInitialPosition(false); // Setting the state to indicate a new position
+              setControlsEnabled(true); // Enabling controls for user interaction
             },
           });
         } else {
-          returnToOriginalPosition();
+          returnToOriginalPosition(); // If the camera is not in the initial position, return it to the original position
         }
       } else {
-        returnToOriginalPosition();
+        returnToOriginalPosition(); // If the object's name is not "model," return the camera to the original position
       }
     }
   };
 
+  // An effect that handles the animation of the camera's movement
   useEffect(() => {
+    // If the group reference is not available or controls are already enabled, return
     if (!groupRef.current || controlsEnabled) return;
+
+    // Using GSAP to animate the camera's position
     gsap.fromTo(
-      camera.position,
+      camera.position, // Starting position of the camera
       {
-        x: -25,
-        y: 4,
-        z: -15,
+        x: -25, // Initial x coordinate
+        y: 4, // Initial y coordinate
+        z: -15, // Initial z coordinate
       },
       {
-        duration: 10,
-        x: 5,
-        y: 5.5,
-        z: -15,
-
-        delay: 1,
-        ease: TWEEN.Easing.Quartic.InOut,
+        duration: 10, // Duration of the animation in seconds
+        x: 5, // Final x coordinate
+        y: 5.5, // Final y coordinate
+        z: -15, // Final z coordinate
+        delay: 1, // Delay before the animation starts
+        ease: TWEEN.Easing.Quartic.InOut, // Easing function for smoother motion
 
         onUpdate: () => {
+          // Function to update the camera's focus on a specific position
           camera.lookAt(...buildingRef.current.position);
         },
         onComplete: () => {
-          setControlsEnabled(true);
-          setInitialAnimationPlaying(false);
+          // Action to perform once the animation is complete
+          setControlsEnabled(true); // Enable controls for user interaction
+          setInitialAnimationPlaying(false); // Update the state for the initial animation
         },
       }
     );
-  }, [groupRef.current]);
+  }, [groupRef.current]); // Dependency array for the effect
 
+  // A frame update function handling the rotation of specified references
   useFrame(() => {
+    // Check if the ferrisWheelRef is available and rotate it around the y-axis
     if (ferrisWheelRef.current) {
       ferrisWheelRef.current.rotation.y += 0.03;
     }
+
+    // Check each windFanRef for availability and rotate them around the z-axis
     if (windFanRefs.some((ref) => ref.current)) {
       windFanRefs.forEach((ref) => {
         if (ref.current) {
@@ -314,7 +331,7 @@ export function Model(props) {
           scale={0.05}
         />
         <group
-          name='model'
+          name="model"
           position={[0.4, 0.36, 0.53]}
           rotation={[0, Math.PI / 2, 0]}
           scale={0.65}
@@ -346,7 +363,7 @@ export function Model(props) {
           />
         </group>
         <group
-          name='ferriswheel'
+          name="ferriswheel"
           position={[3.7, 1.49, -3.29]}
           rotation={[Math.PI / 2, 1.57, 0]}
           scale={[-1, 0.15, 1]}
@@ -389,7 +406,7 @@ export function Model(props) {
             ref={ferrisWheelRef}
           />
         </group>
-        <group position={[3.25, 0.36, 2.93]} scale={0.65} name='circlebase'>
+        <group position={[3.25, 0.36, 2.93]} scale={0.65} name="circlebase">
           <mesh
             geometry={nodes.CircleBuildBase004.geometry}
             material={materials.CircularBuildMain}
@@ -504,7 +521,7 @@ export function Model(props) {
         </group>
 
         <group
-          name='model'
+          name="model"
           position={[2.91, 0.36, 0.55]}
           rotation={[0, -Math.PI / 2, 0]}
           scale={0.54}
@@ -550,7 +567,7 @@ export function Model(props) {
             material={materials.BuildingRed}
           />
         </group>
-        <group name='model' position={[-3.02, 0.36, 0.95]} scale={0.54}>
+        <group name="model" position={[-3.02, 0.36, 0.95]} scale={0.54}>
           <mesh
             geometry={nodes.Cube046.geometry}
             material={materials.OldBrick}
@@ -588,7 +605,7 @@ export function Model(props) {
             material={materials.DarkMetal}
           />
         </group>
-        <group name='model' position={[0.71, 0.36, 3.32]} scale={0.54}>
+        <group name="model" position={[0.71, 0.36, 3.32]} scale={0.54}>
           <mesh
             geometry={nodes.Cube049.geometry}
             material={materials.SquareBlockMain}
@@ -634,7 +651,7 @@ export function Model(props) {
             material={materials.Metal}
           />
         </group>
-        <group position={[1.28, 0.36, -2.04]} scale={0.54} name='model'>
+        <group position={[1.28, 0.36, -2.04]} scale={0.54} name="model">
           <mesh
             geometry={nodes.Cube052.geometry}
             material={materials.SquareBlockMain}
@@ -672,7 +689,7 @@ export function Model(props) {
             material={materials.Air_conditioning}
           />
         </group>
-        <group name='model' position={[4.3, 0.36, -1.67]} scale={0.54}>
+        <group name="model" position={[4.3, 0.36, -1.67]} scale={0.54}>
           <mesh
             geometry={nodes.Cube005_1.geometry}
             material={materials.SquareBlockMain}
@@ -718,7 +735,7 @@ export function Model(props) {
             material={materials.BuildingWhite}
           />
         </group>
-        <group position={[-0.36, 0.36, -3.56]} scale={0.65} name='model'>
+        <group position={[-0.36, 0.36, -3.56]} scale={0.65} name="model">
           <mesh
             geometry={nodes.CircleBuildBase002_1.geometry}
             material={materials.CircularBuildMain}
@@ -788,7 +805,7 @@ export function Model(props) {
             />
           </group>
         </group>
-        <group position={[-2.39, 0.36, -3.05]} name='model'>
+        <group position={[-2.39, 0.36, -3.05]} name="model">
           <mesh
             geometry={nodes.Cube038.geometry}
             material={materials.BuildingDarkBlue}
