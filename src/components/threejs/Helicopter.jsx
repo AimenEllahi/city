@@ -22,7 +22,7 @@ function Helicopter() {
       z: -0.6,
       onComplete: () => {
         // Reset the position of the helicopter
-        gsap.set(helicopterRef.current.position, {
+        gsap.set(helicopterRef.current?.position, {
           x: -8.2,
           y: 3.4,
           z: -6.6,

@@ -5,8 +5,8 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import gsap from "gsap";
 
 function Car() {
-  const dracoLoader = new DRACOLoader();
   const carRef = useRef();
+  const dracoLoader = new DRACOLoader();
   dracoLoader.setDecoderPath("https://www.gstatic.com/draco/v1/decoders/");
   const gltf = useLoader(GLTFLoader, "/models/car2.glb", (loader) => {
     loader.setDRACOLoader(dracoLoader);

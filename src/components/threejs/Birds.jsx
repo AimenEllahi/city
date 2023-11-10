@@ -21,7 +21,7 @@ function Birds() {
       z: 55.30000000000003,
       onComplete: () => {
         // Reset the position of the birds
-        gsap.set(birdsRef.current.position, {
+        gsap.set(birdsRef.current?.position, {
           x: 0,
           y: 15.999999999999972,
           z: 25.30000000000003,

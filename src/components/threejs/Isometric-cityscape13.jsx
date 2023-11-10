@@ -1,12 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useGLTF, PresentationControls, Html } from "@react-three/drei";
-import { useControls } from "leva";
 import Car from "./Car";
 import Helicopter from "./Helicopter";
 import Birds from "./Birds";
 import { gsap } from "gsap";
-import { TextureLoader } from "three";
-import { useFrame, useThree, useLoader } from "@react-three/fiber";
+
+import { useFrame, useThree } from "@react-three/fiber";
 import * as TWEEN from "three/examples/jsm/libs/tween.module.js";
 import * as THREE from "three";
 
@@ -16,7 +15,6 @@ export function Model(props) {
   const { camera } = useThree();
   const buildingRef = useRef();
   const groupRef = useRef();
-  const cursorRef = useRef();
   const ferrisWheelRef = useRef();
   const windFanRefs = [
     useRef(),
@@ -156,32 +154,37 @@ export function Model(props) {
     }
   });
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!cursorRef.current) return;
-      cursorRef.current.style.left = e.clientX + "px";
-      cursorRef.current.style.top = e.clientY + "px";
-    };
+  const handlePointerMove = (e) => {
+    getMousePosition(e); // Getting the mouse position
+    raycaster.setFromCamera(mouse, camera); // Setting the raycaster position
 
-    document.addEventListener("mousemove", handleMouseMove);
+    // Intersecting objects with the raycaster
+    const intersects = raycaster.intersectObjects(
+      groupRef.current.children,
+      true
+    );
 
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, []);
+    // If intersecting objects are found
+    if (intersects.length > 0) {
+      const name = intersects[0].object.parent.name; // Getting the name of the object
+
+      // Handling the case when the object's name is "model"
+      if (name === "model" || name === "cursor") {
+        console.log("here");
+        document.body.style.cursor = `url('/ring.png') 16 16, auto`;
+      } else {
+        console.log("out");
+        document.body.style.cursor = "grab";
+      }
+    }
+  };
 
   return (
-    <PresentationControls enabled={controlsEnabled} polar={[0, 0]}>
-      <Html>
-        <div
-          ref={cursorRef}
-          className="absolute h-5 w-5 border-2 border-black rounded-full"
-          style={{
-            transform: "translate(-3400%, -1800%)",
-          }}
-        ></div>
-      </Html>
-
+    <PresentationControls
+      cursor={false}
+      enabled={controlsEnabled}
+      polar={[0, 0]}
+    >
       <group
         {...props}
         ref={groupRef}
@@ -191,20 +194,28 @@ export function Model(props) {
           if (!controlsEnabled) return;
           handleMouseDown(e);
         }}
+        onPointerMove={(e) => {
+          if (initalAnimationPlaying) return;
+          if (!controlsEnabled) return;
+          handlePointerMove(e);
+        }}
       >
         <mesh
           geometry={nodes.Landskape_plane_Landscape_color_1_0002.geometry}
           material={materials["Landscape_color_1.001"]}
         />
         <mesh
+          name='cursor'
           geometry={nodes.Landskape_plane_Landscape_color_1_0002_1.geometry}
           material={materials.StreetGrey}
         />
         <mesh
+          name='cursor'
           geometry={nodes.Landskape_plane_Landscape_color_1_0002_2.geometry}
           material={materials["TreeGreen.005"]}
         />
         <mesh
+          name='cursor'
           geometry={nodes.Landskape_plane_Landscape_color_1_0002_3.geometry}
           material={materials["TreeGreen.005"]}
         />
@@ -356,8 +367,9 @@ export function Model(props) {
           rotation={[0, -0.16, 0]}
           scale={0.05}
         />
+
         <group
-          name="model"
+          name='model'
           position={[0.4, 0.36, 0.53]}
           rotation={[0, Math.PI / 2, 0]}
           scale={0.65}
@@ -389,7 +401,7 @@ export function Model(props) {
           />
         </group>
         <group
-          name="ferriswheel"
+          name='model'
           position={[3.7, 1.49, -3.29]}
           rotation={[Math.PI / 2, 1.57, 0]}
           scale={[-1, 0.15, 1]}
@@ -432,7 +444,7 @@ export function Model(props) {
             ref={ferrisWheelRef}
           />
         </group>
-        <group position={[3.25, 0.36, 2.93]} scale={0.65} name="circlebase">
+        <group position={[3.25, 0.36, 2.93]} scale={0.65} name='model'>
           <mesh
             geometry={nodes.CircleBuildBase004.geometry}
             material={materials.CircularBuildMain}
@@ -545,9 +557,8 @@ export function Model(props) {
             material={materials.DarkMetal}
           />
         </group>
-
         <group
-          name="model"
+          name='model'
           position={[2.91, 0.36, 0.55]}
           rotation={[0, -Math.PI / 2, 0]}
           scale={0.54}
@@ -593,7 +604,7 @@ export function Model(props) {
             material={materials.BuildingRed}
           />
         </group>
-        <group name="model" position={[-3.02, 0.36, 0.95]} scale={0.54}>
+        <group name='model' position={[-3.02, 0.36, 0.95]} scale={0.54}>
           <mesh
             geometry={nodes.Cube046.geometry}
             material={materials.OldBrick}
@@ -631,7 +642,7 @@ export function Model(props) {
             material={materials.DarkMetal}
           />
         </group>
-        <group name="model" position={[0.71, 0.36, 3.32]} scale={0.54}>
+        <group name='model' position={[0.71, 0.36, 3.32]} scale={0.54}>
           <mesh
             geometry={nodes.Cube049.geometry}
             material={materials.SquareBlockMain}
@@ -677,7 +688,7 @@ export function Model(props) {
             material={materials.Metal}
           />
         </group>
-        <group position={[1.28, 0.36, -2.04]} scale={0.54} name="model">
+        <group position={[1.28, 0.36, -2.04]} scale={0.54} name='model'>
           <mesh
             geometry={nodes.Cube052.geometry}
             material={materials.SquareBlockMain}
@@ -715,7 +726,7 @@ export function Model(props) {
             material={materials.Air_conditioning}
           />
         </group>
-        <group name="model" position={[4.3, 0.36, -1.67]} scale={0.54}>
+        <group name='model' position={[4.3, 0.36, -1.67]} scale={0.54}>
           <mesh
             geometry={nodes.Cube005_1.geometry}
             material={materials.SquareBlockMain}
@@ -761,7 +772,7 @@ export function Model(props) {
             material={materials.BuildingWhite}
           />
         </group>
-        <group position={[-0.36, 0.36, -3.56]} scale={0.65} name="model">
+        <group position={[-0.36, 0.36, -3.56]} scale={0.65} name='model'>
           <mesh
             geometry={nodes.CircleBuildBase002_1.geometry}
             material={materials.CircularBuildMain}
@@ -791,7 +802,25 @@ export function Model(props) {
             material={materials.DarkMetal}
           />
         </group>
-        <group position={[-1.33, 1.25, 1.5]}>
+        <group position={[-2.39, 0.36, -3.05]} name='model'>
+          <mesh
+            geometry={nodes.Cube038.geometry}
+            material={materials.BuildingDarkBlue}
+          />
+          <mesh
+            geometry={nodes.Cube038_1.geometry}
+            material={materials.BuildingOrange}
+          />
+          <mesh
+            geometry={nodes.Cube038_2.geometry}
+            material={materials.WindowLightBlue}
+          />
+          <mesh
+            geometry={nodes.Cube038_3.geometry}
+            material={materials.BlackoutWindow}
+          />
+        </group>
+        <group position={[-1.33, 1.25, 1.5]} name='model'>
           <mesh
             geometry={nodes.Cone003.geometry}
             material={materials.BuildingDarkBlue}
@@ -831,25 +860,12 @@ export function Model(props) {
             />
           </group>
         </group>
-        <group position={[-2.39, 0.36, -3.05]} name="model">
-          <mesh
-            geometry={nodes.Cube038.geometry}
-            material={materials.BuildingDarkBlue}
-          />
-          <mesh
-            geometry={nodes.Cube038_1.geometry}
-            material={materials.BuildingOrange}
-          />
-          <mesh
-            geometry={nodes.Cube038_2.geometry}
-            material={materials.WindowLightBlue}
-          />
-          <mesh
-            geometry={nodes.Cube038_3.geometry}
-            material={materials.BlackoutWindow}
-          />
-        </group>
-        <group position={[1.71, 0.36, 0.36]} scale={[0.36, 0.65, 4.9]}>
+
+        <group
+          name='cursor'
+          position={[1.71, 0.36, 0.36]}
+          scale={[0.36, 0.65, 4.9]}
+        >
           <mesh
             geometry={nodes.Plane002.geometry}
             material={materials["SceneBl;ack"]}
@@ -861,6 +877,7 @@ export function Model(props) {
         </group>
 
         <mesh
+          name='cursor'
           geometry={nodes.CityBase002.geometry}
           material={materials.Metal}
           position={[3.89, 0.47, -3.45]}
@@ -871,4 +888,4 @@ export function Model(props) {
   );
 }
 
-useGLTF.preload("/isometric-cityscape13.glb");
+useGLTF.preload("/models/isometric-cityscape13.glb");
