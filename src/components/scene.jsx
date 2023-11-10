@@ -9,13 +9,17 @@ function Scene() {
     <div className="w-screen h-screen">
       <Canvas>
         <fog attach="fog" args={["#fff", 0, 110]} />
-        <Environment preset="sunset" />
-        <ambientLight color={0xa0a0fc} intensity={0.82} />
-        <directionalLight position={[-10, 10, 10]} intensity={1.96} />
+        <Environment preset="forest" />
+        <ambientLight color={0xe8c37b} intensity={2} />
         <directionalLight
-          color={0xe8c37b}
-          position={[-69, 44, 14]}
-          intensity={1.96}
+          position={[-10, 10, 10]}
+          intensity={6}
+          color={0xec8f5e}
+        />
+        <directionalLight
+          color={0xec8f5e}
+          position={[-69, 24, 14]}
+          intensity={5}
         />
         <Suspense fallback={<Loader />}>
           <Model />

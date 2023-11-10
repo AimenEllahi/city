@@ -1,10 +1,11 @@
 import React, { useRef, useEffect, useState } from "react";
-import { useGLTF, PresentationControls } from "@react-three/drei";
+import { useGLTF, PresentationControls, Html } from "@react-three/drei";
 import { useControls } from "leva";
 import Car from "./Car";
 import Helicopter from "./Helicopter";
 import Birds from "./Birds";
 import { gsap } from "gsap";
+import { TextureLoader } from "three";
 import { useFrame, useThree, useLoader } from "@react-three/fiber";
 import * as TWEEN from "three/examples/jsm/libs/tween.module.js";
 import * as THREE from "three";
@@ -15,6 +16,7 @@ export function Model(props) {
   const { camera } = useThree();
   const buildingRef = useRef();
   const groupRef = useRef();
+  const cursorRef = useRef();
   const ferrisWheelRef = useRef();
   const windFanRefs = [
     useRef(),
@@ -154,8 +156,32 @@ export function Model(props) {
     }
   });
 
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!cursorRef.current) return;
+      cursorRef.current.style.left = e.clientX + "px";
+      cursorRef.current.style.top = e.clientY + "px";
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
   return (
     <PresentationControls enabled={controlsEnabled} polar={[0, 0]}>
+      <Html>
+        <div
+          ref={cursorRef}
+          className="absolute h-5 w-5 border-2 border-black rounded-full"
+          style={{
+            transform: "translate(-3400%, -1800%)",
+          }}
+        ></div>
+      </Html>
+
       <group
         {...props}
         ref={groupRef}
