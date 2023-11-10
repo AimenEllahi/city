@@ -9,6 +9,7 @@ import { TextureLoader } from "three";
 import { useFrame, useThree, useLoader } from "@react-three/fiber";
 import * as TWEEN from "three/examples/jsm/libs/tween.module.js";
 import * as THREE from "three";
+import svg from "/ring.svg";
 
 export function Model(props) {
   const { nodes, materials } = useGLTF("/models/isometric-cityscape13.glb");
@@ -16,7 +17,6 @@ export function Model(props) {
   const { camera } = useThree();
   const buildingRef = useRef();
   const groupRef = useRef();
-  const cursorRef = useRef();
   const ferrisWheelRef = useRef();
   const windFanRefs = [
     useRef(),
@@ -31,6 +31,7 @@ export function Model(props) {
   const mouse = new THREE.Vector2();
   const initialCameraPosition = { x: 5, y: 5.5, z: -15 };
   const [isInitialPosition, setIsInitialPosition] = useState(true);
+  const [isPointerOverModel, setIsPointerOverModel] = useState(false);
 
   const getMousePosition = (e) => {
     mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -156,32 +157,16 @@ export function Model(props) {
     }
   });
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!cursorRef.current) return;
-      cursorRef.current.style.left = e.clientX + "px";
-      cursorRef.current.style.top = e.clientY + "px";
-    };
+  const handlePointerOver = () => {
+    setIsPointerOverModel(true);
+  };
 
-    document.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, []);
+  const handlePointerOut = () => {
+    setIsPointerOverModel(false);
+  };
 
   return (
     <PresentationControls enabled={controlsEnabled} polar={[0, 0]}>
-      <Html>
-        <div
-          ref={cursorRef}
-          className="absolute h-5 w-5 border-2 border-black rounded-full"
-          style={{
-            transform: "translate(-3400%, -1800%)",
-          }}
-        ></div>
-      </Html>
-
       <group
         {...props}
         ref={groupRef}
@@ -362,6 +347,8 @@ export function Model(props) {
           rotation={[0, Math.PI / 2, 0]}
           scale={0.65}
           ref={buildingRef}
+          onPointerEnter={handlePointerOver}
+          onPointerLeave={handlePointerOut}
         >
           <mesh
             geometry={nodes.CircleBuildBase003_1.geometry}
